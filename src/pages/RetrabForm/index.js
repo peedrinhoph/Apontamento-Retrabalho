@@ -32,67 +32,85 @@ function RetrabForm() {
     const [motivoErr, setMotivoErr] = useState('');
 
     async function handleValidaCodBarra() {
-        const apiValidaCodBarras = await api.get(`/consulta_codbarras/${cod_barras}`);
-        const codbarrasIsOk = apiValidaCodBarras.data.map(rest => rest['ID']);
-        
-        if (codbarrasIsOk[0] > 0) {
-            setCod_barrasErr('')
-        } else {
-            setCod_barrasErr('Código de barras não encontrado.')
+        if (cod_barras) {
+            const apiValidaCodBarras = await api.get(`/consulta_codbarras/${cod_barras}`);
+            const codbarrasIsOk = apiValidaCodBarras.data.map(rest => rest['ID']);
+
+            if (codbarrasIsOk[0] > 0) {
+                console.log(codbarrasIsOk[0])
+                setCod_barrasErr('')
+            } else {
+                setCod_barrasErr('Código de barras não encontrado.')
+            }
         }
     }
 
     async function handleValidaProcesso() {
-        const apiValidaProcesso = await api.get(`/consulta_processo/${processo}`);
-        const processoIsOk = apiValidaProcesso.data.map(rest => rest['ID']);
-        if (processoIsOk[0] > 0) {
-            setProcessoId(processoIsOk[0])
-            setProcessoErr('')
-        } else {
-            setProcessoErr('Processo não encontrado.')
+        if (processo) {
+            const apiValidaProcesso = await api.get(`/consulta_processo/${processo}`);
+            const processoIsOk = apiValidaProcesso.data.map(rest => rest['ID']);
+            if (processoIsOk[0] > 0) {
+                console.log(processoIsOk[0])
+                setProcessoId(processoIsOk[0])
+                setProcessoErr('')
+            } else {
+                setProcessoErr('Processo não encontrado.')
+            }
         }
     }
 
     async function handleValidaEtapa() {
-        const apiValidaEtapa = await api.get(`/consulta_etapa/${etapa}`);
-        const etapaIsOk = apiValidaEtapa.data.map(rest => rest['ID']);
-        if (etapaIsOk[0] > 0) {
-            setEtapaId(etapaIsOk[0])
-            setEtapaErr('')
-        } else {
-            setEtapaErr('Etapa não encontrada.')
+        if (etapa) {
+            const apiValidaEtapa = await api.get(`/consulta_etapa/${etapa}`);
+            const etapaIsOk = apiValidaEtapa.data.map(rest => rest['ID']);
+            if (etapaIsOk[0] > 0) {
+                console.log(etapaIsOk[0])
+                setEtapaId(etapaIsOk[0])
+                setEtapaErr('')
+            } else {
+                setEtapaErr('Etapa não encontrada.')
+            }
         }
     }
 
     async function handleValidaReparo() {
-        const apiValidaReparo = await api.get(`/consulta_reparo/${reparo}`);
-        const reparoIsOk = apiValidaReparo.data.map(rest => rest['ID']);
-        if (reparoIsOk[0] > 0) {
-            setReparoId(reparoIsOk[0])
-            setReparoErr('')
-        } else {
-            setReparoErr('Reparo não encontrado.')
+        if (reparo) {
+            const apiValidaReparo = await api.get(`/consulta_reparo/${reparo}`);
+            const reparoIsOk = apiValidaReparo.data.map(rest => rest['ID']);
+            if (reparoIsOk[0] > 0) {
+                console.log(reparoIsOk[0])
+                setReparoId(reparoIsOk[0])
+                setReparoErr('')
+            } else {
+                setReparoErr('Reparo não encontrado.')
+            }
         }
     }
 
     async function handleValidaCausa() {
-        const apiValidaCausa = await api.get(`/consulta_causa/${causa}`);
-        const causaIsOk = apiValidaCausa.data.map(rest => rest['ID']);
-        if (causaIsOk[0] > 0) {
-            setCausaId(causaIsOk[0])
-            setCausaErr('')
-        } else {
-            setCausaErr('Causa não encontrada.')
+        if (causa) {
+            const apiValidaCausa = await api.get(`/consulta_causa/${causa}`);
+            const causaIsOk = apiValidaCausa.data.map(rest => rest['ID']);
+            if (causaIsOk[0] > 0) {
+                console.log(causaIsOk[0])
+                setCausaId(causaIsOk[0])
+                setCausaErr('')
+            } else {
+                setCausaErr('Causa não encontrada.')
+            }
         }
     }
 
     async function handleValidaMotivo() {
-        const apiValidaMotivo = await api.get(`/consulta_motivo/${motivo}`);
-        const motivoIsOk = apiValidaMotivo.data.map(rest => rest['ID']);
-        if (motivoIsOk[0] > 0) {
-            setMotivoErr('')
-        } else {
-            setMotivoErr('Motivo não encontrado.')
+        if (motivo) {
+            const apiValidaMotivo = await api.get(`/consulta_motivo/${motivo}`);
+            const motivoIsOk = apiValidaMotivo.data.map(rest => rest['ID']);
+            if (motivoIsOk[0] > 0) {
+                console.log(motivoIsOk[0])
+                setMotivoErr('')
+            } else {
+                setMotivoErr('Motivo não encontrado.')
+            }
         }
     }
 
@@ -101,7 +119,7 @@ function RetrabForm() {
         if (cod_barrasErr || processoErr || etapaErr || reparoErr || causaErr || motivoErr) {
             alert('Oops, verifique os erros apontados na tela!');
         } else {
-            await api.post('/gravar_retrabalho', {
+            const grava = await api.post('/gravar_retrabalho', {
                 cod_barras,
                 processo: processoId,
                 etapa: etapaId,
@@ -109,7 +127,7 @@ function RetrabForm() {
                 causa: causaId,
                 motivo
             });
-
+            console.log(grava)
             //localStorage.setItem('user', _id);
             setCod_barras('');
             setProcesso('');
