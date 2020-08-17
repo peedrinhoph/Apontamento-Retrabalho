@@ -45,7 +45,7 @@
 
 @media (min-width: 700px) {
     .page-header {
-        height: 150px;
+        height: 125px;
     }
 
     .page-header .top-bar-container {
@@ -54,7 +54,7 @@
 
     .page-header .header-content {
         flex: 1;
-        max-width: 650px;
+        max-width: 540px;
         margin: 0 auto;
         padding-bottom: 48px;
         display: flex;
