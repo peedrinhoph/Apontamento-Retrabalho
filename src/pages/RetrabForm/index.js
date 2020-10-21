@@ -11,6 +11,7 @@ import './styles.css';
 function RetrabForm() {
     const [cod_barras, setCod_barras] = useState('');
     const [cod_barrasErr, setCod_barrasErr] = useState('');
+    const [cod_barrasInfo, setCod_barrasInfo] = useState('');
 
     const [processo, setProcesso] = useState('');
     const [processoId, setProcessoId] = useState('');
@@ -34,13 +35,19 @@ function RetrabForm() {
     async function handleValidaCodBarra() {
         if (cod_barras) {
             const apiValidaCodBarras = await api.get(`/consulta_codbarras/${cod_barras}`);
-            const codbarrasIsOk = apiValidaCodBarras.data.map(rest => rest['ID']);
-
+            const codbarrasIsOk = apiValidaCodBarras.data[0].map(rest => rest['ID']);
+            const cod_barrasMessage = apiValidaCodBarras.data[1].map(rest => rest['message']);
+            console.log(cod_barrasMessage[0])
             if (codbarrasIsOk[0] > 0) {
-                console.log(codbarrasIsOk[0])
-                setCod_barrasErr('')
+                setCod_barrasErr()
             } else {
                 setCod_barrasErr('Código de barras não encontrado.')
+            }
+
+            if (cod_barrasMessage[0]) {
+                setCod_barrasInfo(cod_barrasMessage[0])
+            } else {
+                setCod_barrasInfo()
             }
         }
     }
@@ -156,6 +163,7 @@ function RetrabForm() {
                             onChange={(e) => { setCod_barras(e.target.value) }}
                             onBlur={handleValidaCodBarra} />
                         {cod_barrasErr && <p>{cod_barrasErr}</p>}
+                        {cod_barrasInfo && <p>{cod_barrasInfo}</p>}
                         <Input
                             type="number"
                             required
