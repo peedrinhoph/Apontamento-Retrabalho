@@ -9,6 +9,9 @@ import warningIcon from '../../assets/images/icons/warning.svg';
 import './styles.css';
 
 function RetrabForm() {
+    const [cod_maquina, setCod_maquina] = useState('');
+    const [cod_maquinaErr, setCod_maquinaErr] = useState('');
+
     const [cod_barras, setCod_barras] = useState('');
     const [cod_barrasErr, setCod_barrasErr] = useState('');
     const [cod_barrasInfo, setCod_barrasInfo] = useState('');
@@ -32,12 +35,41 @@ function RetrabForm() {
     const [motivo, setMotivo] = useState('');
     const [motivoErr, setMotivoErr] = useState('');
 
+    const validaMaquina = (val) => {
+        if (val === '310' || val === '350' || val === 'INSP1')
+            return true
+        else
+            return false
+
+    }
+
+    async function handleValidaCodMaquina() {
+        if (cod_maquina) {
+            const apiValidaMaquina = await api.get(`/consulta_maquina/${cod_maquina}`);
+            const maquinaIsOk = apiValidaMaquina.data.map(rest => rest['ID']);
+            if (maquinaIsOk[0] > 0) {
+                setCod_maquinaErr('')
+                setCod_barras('')
+                setCod_barrasErr('')
+                setCod_barrasInfo('')
+                if (validaMaquina(cod_maquina))
+                    document.getElementById('cod_barras').type = 'text';
+                else
+                    document.getElementById('cod_barras').type = 'number';
+
+            } else {
+                setCod_maquinaErr('Máquina não encontrada.')
+            }
+        }
+    }
+
     async function handleValidaCodBarra() {
+        if (!validaMaquina(cod_maquina))
         if (cod_barras) {
             const apiValidaCodBarras = await api.get(`/consulta_codbarras/${cod_barras}`);
             const codbarrasIsOk = apiValidaCodBarras.data[0].map(rest => rest['ID']);
             const cod_barrasMessage = apiValidaCodBarras.data[1].map(rest => rest['message']);
-            console.log(cod_barrasMessage[0])
+            //console.log(cod_barrasMessage[0])
             if (codbarrasIsOk[0] > 0) {
                 setCod_barrasErr()
             } else {
@@ -123,10 +155,11 @@ function RetrabForm() {
 
     async function handleCreate(e) {
         e.preventDefault();
-        if (cod_barrasErr || processoErr || etapaErr || reparoErr || causaErr || motivoErr) {
+        if (cod_maquinaErr || cod_barrasErr || processoErr || etapaErr || reparoErr || causaErr || motivoErr) {
             alert('Oops, verifique os erros apontados na tela!');
         } else {
             const grava = await api.post('/gravar_retrabalho', {
+                cod_maquina,
                 cod_barras,
                 processo: processoId,
                 etapa: etapaId,
@@ -136,12 +169,14 @@ function RetrabForm() {
             });
             console.log(grava)
             //localStorage.setItem('user', _id);
+            setCod_maquina('');
             setCod_barras('');
             setProcesso('');
             setEtapa('');
             setReparo('');
             setCausa('');
             setMotivo('');
+            setCod_barrasInfo('');
             alert('Sucesso, Retrabalho registrado!');
         }
 
@@ -155,6 +190,16 @@ function RetrabForm() {
                 <form onSubmit={handleCreate} autocomplete="off">
                     <fieldset>
                         <Input
+                            type="text"
+                            required
+                            name="cod_maquina"
+                            label="Máquina"
+                            value={cod_maquina}
+                            onChange={(e) => { setCod_maquina(e.target.value) }}
+                            onBlur={handleValidaCodMaquina} />
+                        {cod_maquinaErr && <p>{cod_maquinaErr}</p>}
+                        <Input
+                            id="cod_barras"
                             type="number"
                             required
                             name="cod_barras"
