@@ -7,7 +7,7 @@
 }
 
 .textarea-block label {
-    font-size: 1.4rem;
+    font-size: 2rem;
 }
 
 .textarea-block textarea {
@@ -21,7 +21,7 @@
     outline: 0;
     resize: vertical;
     padding: 1.2rem 1.6rem;
-    font: 1.6rem Archivo;
+    font: 2.6rem Arial;
 }
 
 .textarea-block:focus-within::after {

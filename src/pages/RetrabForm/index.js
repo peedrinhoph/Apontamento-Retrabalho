@@ -4,13 +4,17 @@ import api from '../../services/api';
 
 import PageHeader from '../../components/PageHeader';
 import Input from '../../components/Input';
+import Textarea from '../../components/Textarea';
 import warningIcon from '../../assets/images/icons/warning.svg';
 
 import './styles.css';
 
 function RetrabForm() {
-    const [cod_maquina, setCod_maquina] = useState('');
-    const [cod_maquinaErr, setCod_maquinaErr] = useState('');
+    const [cod_turno, setCod_turno] = useState('');
+    const [cod_turnoErr, setCod_turnoErr] = useState('');
+
+    const [cod_centro, setCod_centro] = useState('');
+    const [cod_centroErr, setCod_centroErr] = useState('');
 
     const [cod_barras, setCod_barras] = useState('');
     const [cod_barrasErr, setCod_barrasErr] = useState('');
@@ -35,53 +39,64 @@ function RetrabForm() {
     const [motivo, setMotivo] = useState('');
     const [motivoErr, setMotivoErr] = useState('');
 
-    const validaMaquina = (val) => {
-        if (val === '310' || val === '350' || val === 'INSP1')
+    const [quantidade, setQuantidade] = useState('');
+
+    const [observacao, setObservacao] = useState('');
+
+    const validaCentro = (val) => {
+        if (val === '212')
             return true
         else
             return false
 
     }
 
-    async function handleValidaCodMaquina() {
-        if (cod_maquina) {
-            const apiValidaMaquina = await api.get(`/consulta_maquina/${cod_maquina}`);
-            const maquinaIsOk = apiValidaMaquina.data.map(rest => rest['ID']);
-            if (maquinaIsOk[0] > 0) {
-                setCod_maquinaErr('')
+    async function handleValidaTurno() {
+        if (cod_turno === 'TURNO1' || cod_turno === 'TURNO2')
+            setCod_turnoErr('')
+        else
+            setCod_turnoErr('Turno inválido')
+    }
+
+    async function handleValidaCodCentro() {
+        if (cod_centro) {
+            const apiValidaCentro = await api.get(`/consulta_centro/${cod_centro}`);
+            const centroIsOk = apiValidaCentro.data.map(rest => rest['COD_RED']);
+            if (centroIsOk[0] > 0) {
+                setCod_centroErr('')
                 setCod_barras('')
                 setCod_barrasErr('')
                 setCod_barrasInfo('')
-                if (validaMaquina(cod_maquina))
+                if (validaCentro(cod_centro))
                     document.getElementById('cod_barras').type = 'text';
                 else
                     document.getElementById('cod_barras').type = 'number';
 
             } else {
-                setCod_maquinaErr('Máquina não encontrada.')
+                setCod_centroErr('Centro de custo invalido.')
             }
         }
     }
 
     async function handleValidaCodBarra() {
-        if (!validaMaquina(cod_maquina))
-        if (cod_barras) {
-            const apiValidaCodBarras = await api.get(`/consulta_codbarras/${cod_barras}`);
-            const codbarrasIsOk = apiValidaCodBarras.data[0].map(rest => rest['ID']);
-            const cod_barrasMessage = apiValidaCodBarras.data[1].map(rest => rest['message']);
-            //console.log(cod_barrasMessage[0])
-            if (codbarrasIsOk[0] > 0) {
-                setCod_barrasErr()
-            } else {
-                setCod_barrasErr('Código de barras não encontrado.')
-            }
+        if (!validaCentro(cod_centro))
+            if (cod_barras) {
+                const apiValidaCodBarras = await api.get(`/consulta_codbarras/${cod_barras}`);
+                const codbarrasIsOk = apiValidaCodBarras.data[0].map(rest => rest['ID']);
+                const cod_barrasMessage = apiValidaCodBarras.data[1].map(rest => rest['message']);
+                //console.log(cod_barrasMessage[0])
+                if (codbarrasIsOk[0] > 0) {
+                    setCod_barrasErr()
+                } else {
+                    setCod_barrasErr('Código de barras não encontrado.')
+                }
 
-            if (cod_barrasMessage[0]) {
-                setCod_barrasInfo(cod_barrasMessage[0])
-            } else {
-                setCod_barrasInfo()
+                if (cod_barrasMessage[0]) {
+                    setCod_barrasInfo(cod_barrasMessage[0])
+                } else {
+                    setCod_barrasInfo()
+                }
             }
-        }
     }
 
     async function handleValidaProcesso() {
@@ -93,7 +108,7 @@ function RetrabForm() {
                 setProcessoId(processoIsOk[0])
                 setProcessoErr('')
             } else {
-                setProcessoErr('Processo não encontrado.')
+                setProcessoErr('Processo informado é invalido.')
             }
         }
     }
@@ -107,7 +122,7 @@ function RetrabForm() {
                 setEtapaId(etapaIsOk[0])
                 setEtapaErr('')
             } else {
-                setEtapaErr('Etapa não encontrada.')
+                setEtapaErr('Etapa informada é invalida.')
             }
         }
     }
@@ -121,7 +136,7 @@ function RetrabForm() {
                 setReparoId(reparoIsOk[0])
                 setReparoErr('')
             } else {
-                setReparoErr('Reparo não encontrado.')
+                setReparoErr('Reparo informado é invalido.')
             }
         }
     }
@@ -135,7 +150,7 @@ function RetrabForm() {
                 setCausaId(causaIsOk[0])
                 setCausaErr('')
             } else {
-                setCausaErr('Causa não encontrada.')
+                setCausaErr('Causa informada é invalida.')
             }
         }
     }
@@ -148,28 +163,30 @@ function RetrabForm() {
                 console.log(motivoIsOk[0])
                 setMotivoErr('')
             } else {
-                setMotivoErr('Motivo não encontrado.')
+                setMotivoErr('Motivo informado é invalido.')
             }
         }
     }
 
     async function handleCreate(e) {
         e.preventDefault();
-        if (cod_maquinaErr || cod_barrasErr || processoErr || etapaErr || reparoErr || causaErr || motivoErr) {
+        if (cod_turnoErr || cod_centroErr || cod_barrasErr || processoErr || etapaErr || reparoErr || causaErr || motivoErr) {
             alert('Oops, verifique os erros apontados na tela!');
         } else {
             const grava = await api.post('/gravar_retrabalho', {
-                cod_maquina,
+                cod_turno,
+                cod_centro,
                 cod_barras,
                 processo: processoId,
                 etapa: etapaId,
                 reparo: reparoId,
                 causa: causaId,
-                motivo
+                motivo,
+                quantidade,
+                observacao
             });
             console.log(grava)
             //localStorage.setItem('user', _id);
-            setCod_maquina('');
             setCod_barras('');
             setProcesso('');
             setEtapa('');
@@ -177,6 +194,8 @@ function RetrabForm() {
             setCausa('');
             setMotivo('');
             setCod_barrasInfo('');
+            setQuantidade('');
+            setObservacao('');
             alert('Sucesso, Retrabalho registrado!');
         }
 
@@ -186,18 +205,32 @@ function RetrabForm() {
         <div id="page-apontretrab-form" className="container">
             <PageHeader title="Apontamento de Retrabalhos" />
             <main>
-
                 <form onSubmit={handleCreate} autocomplete="off">
                     <fieldset>
-                        <Input
-                            type="text"
-                            required
-                            name="cod_maquina"
-                            label="Máquina"
-                            value={cod_maquina}
-                            onChange={(e) => { setCod_maquina(e.target.value) }}
-                            onBlur={handleValidaCodMaquina} />
-                        {cod_maquinaErr && <p>{cod_maquinaErr}</p>}
+                        <div className="group">
+                            <div>
+                                <Input
+                                    type="text"
+                                    required
+                                    name="cod_turno"
+                                    label="Turno"
+                                    value={cod_turno}
+                                    onChange={(e) => { setCod_turno(e.target.value) }}
+                                    onBlur={handleValidaTurno} />
+                                {cod_turnoErr && <spam>{cod_turnoErr}</spam>}
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    required
+                                    name="cod_centro"
+                                    label="Centro de custo"
+                                    value={cod_centro}
+                                    onChange={(e) => { setCod_centro(e.target.value) }}
+                                    onBlur={handleValidaCodCentro} />
+                                {cod_centroErr && <spam>{cod_centroErr}</spam>}
+                            </div>
+                        </div>
                         <Input
                             id="cod_barras"
                             type="number"
@@ -207,60 +240,87 @@ function RetrabForm() {
                             value={cod_barras}
                             onChange={(e) => { setCod_barras(e.target.value) }}
                             onBlur={handleValidaCodBarra} />
-                        {cod_barrasErr && <p>{cod_barrasErr}</p>}
-                        {cod_barrasInfo && <p>{cod_barrasInfo}</p>}
-                        <Input
+                        {cod_barrasErr && <spam>{cod_barrasErr}</spam>}
+                        {cod_barrasInfo && <spam>{cod_barrasInfo}</spam>}
+                        <div className="group">
+                            <div>
+                                <Input
+                                    type="number"
+                                    required
+                                    name="processo"
+                                    label="Processo"
+                                    value={processo}
+                                    onChange={(e) => { setProcesso(e.target.value) }}
+                                    onBlur={handleValidaProcesso} />
+                                {processoErr && <spam>{processoErr}</spam>}
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    required
+                                    name="etapa"
+                                    label="Etapa"
+                                    value={etapa}
+                                    onChange={(e) => { setEtapa(e.target.value) }}
+                                    onBlur={handleValidaEtapa} />
+                                {etapaErr && <spam>{etapaErr}</spam>}
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    required
+                                    name="reparo"
+                                    label="Reparo"
+                                    value={reparo}
+                                    onChange={(e) => { setReparo(e.target.value) }}
+                                    onBlur={handleValidaReparo} />
+                                {reparoErr && <spam>{reparoErr}</spam>}
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    required
+                                    name="causa"
+                                    label="Causa"
+                                    value={causa}
+                                    onChange={(e) => { setCausa(e.target.value) }}
+                                    onBlur={handleValidaCausa} />
+                                {causaErr && <spam>{causaErr}</spam>}
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    required
+                                    name="motivo"
+                                    label="Motivo"
+                                    value={motivo}
+                                    onChange={(e) => { setMotivo(e.target.value) }}
+                                    onBlur={handleValidaMotivo} />
+                                {motivoErr && <spam>{motivoErr}</spam>}
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    required
+                                    name="quantidade"
+                                    label="Quantidade"
+                                    value={quantidade}
+                                    onChange={(e) => { setQuantidade(e.target.value) }} />
+                            </div>
+                        </div>
+                        <Textarea
                             type="number"
-                            required
-                            name="processo"
-                            label="Processo"
-                            value={processo}
-                            onChange={(e) => { setProcesso(e.target.value) }}
-                            onBlur={handleValidaProcesso} />
-                        {processoErr && <p>{processoErr}</p>}
-                        <Input
-                            type="number"
-                            required
-                            name="etapa"
-                            label="Etapa"
-                            value={etapa}
-                            onChange={(e) => { setEtapa(e.target.value) }}
-                            onBlur={handleValidaEtapa} />
-                        {etapaErr && <p>{etapaErr}</p>}
-                        <Input
-                            type="number"
-                            required
-                            name="reparo"
-                            label="Reparo"
-                            value={reparo}
-                            onChange={(e) => { setReparo(e.target.value) }}
-                            onBlur={handleValidaReparo} />
-                        {reparoErr && <p>{reparoErr}</p>}
-                        <Input
-                            type="number"
-                            required
-                            name="causa"
-                            label="Causa"
-                            value={causa}
-                            onChange={(e) => { setCausa(e.target.value) }}
-                            onBlur={handleValidaCausa} />
-                        {causaErr && <p>{causaErr}</p>}
-                        <Input
-                            type="number"
-                            required
-                            name="motivo"
-                            label="Motivo"
-                            value={motivo}
-                            onChange={(e) => { setMotivo(e.target.value) }}
-                            onBlur={handleValidaMotivo} />
-                        {motivoErr && <p>{motivoErr}</p>}
+                            name="observacao"
+                            label="Observação"
+                            value={observacao}
+                            onChange={(e) => { setObservacao(e.target.value) }} />
 
                     </fieldset>
                     <footer>
                         <p>
                             <img src={warningIcon} alt="Aviso importante" />
                             Preencha todos os campos do formulário!
-                    </p>
+                        </p>
                         <button type="submit">Registrar o retrabalho agora</button>
                     </footer>
                 </form>
