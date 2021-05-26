@@ -52,7 +52,7 @@ function RetrabForm() {
     }
 
     async function handleValidaTurno() {
-        if (cod_turno === 'TURNO1' || cod_turno === 'TURNO2')
+        if (cod_turno === 'turno1' || cod_turno === 'turno2' || cod_turno === 'Turno1' || cod_turno === 'Turno2')
             setCod_turnoErr('')
         else
             setCod_turnoErr('Turno inválido')
@@ -67,11 +67,13 @@ function RetrabForm() {
                 setCod_barras('')
                 setCod_barrasErr('')
                 setCod_barrasInfo('')
-                if (validaCentro(cod_centro))
-                    document.getElementById('cod_barras').type = 'text';
-                else
+                if (validaCentro(cod_centro)) {
                     document.getElementById('cod_barras').type = 'number';
-
+                    setQuantidade(1);
+                } else {
+                    document.getElementById('cod_barras').type = 'text';
+                    setQuantidade('');
+                }
             } else {
                 setCod_centroErr('Centro de custo invalido.')
             }
@@ -79,7 +81,7 @@ function RetrabForm() {
     }
 
     async function handleValidaCodBarra() {
-        if (!validaCentro(cod_centro))
+        if (validaCentro(cod_centro))
             if (cod_barras) {
                 const apiValidaCodBarras = await api.get(`/consulta_codbarras/${cod_barras}`);
                 const codbarrasIsOk = apiValidaCodBarras.data[0].map(rest => rest['ID']);
@@ -194,7 +196,9 @@ function RetrabForm() {
             setCausa('');
             setMotivo('');
             setCod_barrasInfo('');
-            setQuantidade('');
+            if (!validaCentro(cod_centro)) {
+                setQuantidade('');
+            }
             setObservacao('');
             alert('Sucesso, Retrabalho registrado!');
         }
@@ -248,7 +252,7 @@ function RetrabForm() {
                                     type="number"
                                     required
                                     name="processo"
-                                    label="Processo"
+                                    label="Processo - Maquina"
                                     value={processo}
                                     onChange={(e) => { setProcesso(e.target.value) }}
                                     onBlur={handleValidaProcesso} />
