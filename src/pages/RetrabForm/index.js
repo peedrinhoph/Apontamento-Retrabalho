@@ -52,7 +52,7 @@ function RetrabForm() {
     }
 
     async function handleValidaTurno() {
-        if (cod_turno === 'turno1' || cod_turno === 'turno2' || cod_turno === 'Turno1' || cod_turno === 'Turno2')
+        if (cod_turno === 'turno1' || cod_turno === 'turno2' || cod_turno === 'TURNO1' || cod_turno === 'TURNO2')
             setCod_turnoErr('')
         else
             setCod_turnoErr('Turno inválido')
@@ -209,7 +209,7 @@ function RetrabForm() {
         <div id="page-apontretrab-form" className="container">
             <PageHeader title="Apontamento de Retrabalhos" />
             <main>
-                <form onSubmit={handleCreate} autocomplete="off">
+                <form onSubmit={handleCreate} autocomplete="off"  acceptCharset="UTF-8">
                     <fieldset>
                         <div className="group">
                             <div>
@@ -299,7 +299,8 @@ function RetrabForm() {
                                     label="Motivo"
                                     value={motivo}
                                     onChange={(e) => { setMotivo(e.target.value) }}
-                                    onBlur={handleValidaMotivo} />
+                                    onBlur={handleValidaMotivo} 
+                                    onKeyPress={event => { if (event.which === 13 /* Enter */) { event.preventDefault(); } }} />
                                 {motivoErr && <spam>{motivoErr}</spam>}
                             </div>
                             <div>
@@ -309,7 +310,8 @@ function RetrabForm() {
                                     name="quantidade"
                                     label="Quantidade"
                                     value={quantidade}
-                                    onChange={(e) => { setQuantidade(e.target.value) }} />
+                                    onChange={(e) => { setQuantidade(e.target.value) }} 
+                                    onKeyPress={event => { if (event.which === 13 /* Enter */) { event.preventDefault(); } }} />
                             </div>
                         </div>
                         <Textarea
@@ -321,11 +323,11 @@ function RetrabForm() {
 
                     </fieldset>
                     <footer>
-                        <p>
+                        {/*<p>
                             <img src={warningIcon} alt="Aviso importante" />
                             Preencha todos os campos do formulário!
-                        </p>
-                        <button type="submit">Registrar o retrabalho agora</button>
+                        </p>*/}
+                        <button type="submit">REGISTRAR O RETRABALHO</button>
                     </footer>
                 </form>
             </main>
